@@ -1,0 +1,16 @@
+# Topics to Highlight
+- VGV analysis lint
+- Routing with go_router
+- HTTP requests with rhttp
+    - Parsing JSON
+    - Handling errors    
+- Signals for state management
+    - Async states
+- Logging
+- Proper error handling
+- Testing
+    - Widget
+    - Unit
+- Theming the app (Light, Dark, and more)
+    - flex_color_scheme
+- Handling app state & restoration
