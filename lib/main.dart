@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:tmdb_signals/home_page.dart';
+import 'package:rhttp/rhttp.dart';
+import 'package:tmdb_signals/views/home_view.dart';
 
 void main() async {
   await dotenv.load(fileName: 'tmdb.env');
+  await Rhttp.init();
   runApp(const MyApp());
 }
 
+/// The main application widget.
 class MyApp extends StatelessWidget {
+  /// Creates the main application widget.
   const MyApp({super.key});
 
   @override
@@ -17,7 +21,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      debugShowCheckedModeBanner: false,
+      home: const HomeView(),
     );
   }
 }
