@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tmdb_signals/config/app_config.dart';
 import 'package:tmdb_signals/models/movie.dart';
 
 /// The movie poster carousel widget.
@@ -79,7 +80,7 @@ class _MoviePosterCarouselState extends State<MoviePosterCarousel> {
               clipBehavior: Clip.antiAlias,
               child: widget.movies[index].posterPath.isNotEmpty
                   ? Image.network(
-                      'https://image.tmdb.org/t/p/w500${widget.movies[index].posterPath}',
+                      '${AppConfig.imageBaseUrl}${widget.movies[index].posterPath}',
                       fit: BoxFit.cover,
                     )
                   : const ColoredBox(

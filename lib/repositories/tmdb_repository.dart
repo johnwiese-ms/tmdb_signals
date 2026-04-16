@@ -1,6 +1,4 @@
-import 'dart:convert';
-
-import 'package:tmdb_signals/exceptions/api_exceptions.dart';
+import 'package:tmdb_signals/config/api_exceptions.dart';
 import 'package:tmdb_signals/models/movie.dart';
 import 'package:tmdb_signals/services/http_service.dart';
 
@@ -13,8 +11,7 @@ class TmdbRepository {
 
   Future<List<Movie>> _getMovies(String path) async {
     try {
-      final response = await _httpService.getAsync(path);
-      final dynamic jsonResponse = jsonDecode(response);
+      final jsonResponse = await _httpService.getJsonAsync(path);
 
       if (jsonResponse['results'] != null) {
         final results = jsonResponse['results'] as List<dynamic>;

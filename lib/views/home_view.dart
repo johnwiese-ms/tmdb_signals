@@ -3,7 +3,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:signals_flutter/signals_flutter.dart';
-import 'package:tmdb_signals/models/movie.dart';
+import 'package:tmdb_signals/config/app_config.dart';
+import 'package:tmdb_signals/controllers/home_controller.dart';
 import 'package:tmdb_signals/repositories/tmdb_repository.dart';
 import 'package:tmdb_signals/widgets/movie_details.dart';
 import 'package:tmdb_signals/widgets/movie_list_filter_row.dart';
@@ -19,34 +20,12 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  final _repository = TmdbRepository();
-  late final List<Future<List<Movie>> Function()> _movieFetchers;
-  late final FutureSignal<List<Movie>> _moviesSignal;
-  final Signal<int> _selectedCategoryIndex = signal<int>(0);
-  final Signal<int> _currentIndexSignal = signal<int>(0);
-
-  static const List<String> _categoryLabels = [
-    'Trending',
-    'Now Playing',
-    'Popular',
-    'Top Rated',
-    'Upcoming',
-  ];
+  late final HomeController _controller;
 
   @override
   void initState() {
     super.initState();
-    _movieFetchers = [
-      _repository.getTrendingMovies,
-      _repository.getNowPlayingMovies,
-      _repository.getPopularMovies,
-      _repository.getTopRatedMovies,
-      _repository.getUpcomingMovies,
-    ];
-    _moviesSignal = futureSignal(
-      () => _movieFetchers[_selectedCategoryIndex.value](),
-      dependencies: [_selectedCategoryIndex],
-    );
+    _controller = HomeController(TmdbRepository());
   }
 
   @override
@@ -64,7 +43,7 @@ class _HomeViewState extends State<HomeView> {
         ),
       ),
       body: Watch((context) {
-        final state = _moviesSignal.value;
+        final state = _controller.moviesSignal.value;
 
         if (state.value == null) {
           return const Center(child: CircularProgressIndicator());
@@ -82,7 +61,7 @@ class _HomeViewState extends State<HomeView> {
           return const Center(child: Text('No movies found.'));
         }
 
-        final activeIndex = _currentIndexSignal.value;
+        final activeIndex = _controller.currentIndex.value;
         final safeIndex = activeIndex < movies.length ? activeIndex : 0;
         final activeMovie = movies[safeIndex];
 
@@ -91,7 +70,7 @@ class _HomeViewState extends State<HomeView> {
           children: [
             if (activeMovie.posterPath.isNotEmpty)
               Image.network(
-                'https://image.tmdb.org/t/p/w500${activeMovie.posterPath}',
+                '${AppConfig.imageBaseUrl}${activeMovie.posterPath}',
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => const ColoredBox(color: Colors.black87),
               )
@@ -108,14 +87,9 @@ class _HomeViewState extends State<HomeView> {
                 children: [
                   const SizedBox(height: 10),
                   MovieListFilterRow(
-                    categories: _categoryLabels,
-                    selectedIndex: _selectedCategoryIndex,
-                    onCategorySelected: (index) {
-                      setState(() {
-                        _selectedCategoryIndex.value = index;
-                        _currentIndexSignal.value = 0;
-                      });
-                    },
+                    categories: _controller.categories.map((c) => c.label).toList(),
+                    selectedIndex: _controller.selectedCategoryIndex,
+                    onCategorySelected: _controller.selectCategory,
                   ),
                   const SizedBox(height: 20),
                   SizedBox(
@@ -123,7 +97,7 @@ class _HomeViewState extends State<HomeView> {
                     child: MoviePosterCarousel(
                       movies: movies,
                       onPageChanged: (index) {
-                        _currentIndexSignal.value = index;
+                        _controller.currentIndex.value = index;
                       },
                     ),
                   ),
