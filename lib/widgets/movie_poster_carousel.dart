@@ -8,6 +8,7 @@ class MoviePosterCarousel extends StatefulWidget {
   const MoviePosterCarousel({
     required this.movies,
     required this.onPageChanged,
+    this.onTap,
     super.key,
   });
 
@@ -16,6 +17,9 @@ class MoviePosterCarousel extends StatefulWidget {
 
   /// The callback to invoke when the selected page (movie) changes.
   final ValueChanged<int> onPageChanged;
+
+  /// The callback to invoke when a movie poster is tapped.
+  final ValueChanged<Movie>? onTap;
 
   @override
   State<MoviePosterCarousel> createState() => _MoviePosterCarouselState();
@@ -60,7 +64,10 @@ class _MoviePosterCarouselState extends State<MoviePosterCarousel> {
                   horizontal: 8,
                   vertical: Curves.easeOut.transform(1 - value) * 40,
                 ),
-                child: child,
+                child: GestureDetector(
+                  onTap: () => widget.onTap?.call(widget.movies[index]),
+                  child: child,
+                ),
               ),
             );
           },

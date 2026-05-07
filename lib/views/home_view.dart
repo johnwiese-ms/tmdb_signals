@@ -2,8 +2,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:tmdb_signals/config/app_config.dart';
+import 'package:tmdb_signals/controllers/app_state.dart';
 import 'package:tmdb_signals/controllers/home_controller.dart';
 import 'package:tmdb_signals/repositories/tmdb_repository.dart';
 import 'package:tmdb_signals/widgets/movie_details.dart';
@@ -72,7 +74,8 @@ class _HomeViewState extends State<HomeView> {
               Image.network(
                 '${AppConfig.imageBaseUrl}${activeMovie.posterPath}',
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => const ColoredBox(color: Colors.black87),
+                errorBuilder: (context, error, stackTrace) =>
+                    const ColoredBox(color: Colors.black87),
               )
             else
               const ColoredBox(color: Colors.black87),
@@ -87,22 +90,41 @@ class _HomeViewState extends State<HomeView> {
                 children: [
                   const SizedBox(height: 10),
                   MovieListFilterRow(
-                    categories: _controller.categories.map((c) => c.label).toList(),
+                    categories: _controller.categories
+                        .map((c) => c.label)
+                        .toList(),
                     selectedIndex: _controller.selectedCategoryIndex,
                     onCategorySelected: _controller.selectCategory,
                   ),
                   const SizedBox(height: 20),
-                  SizedBox(
-                    height: 350,
-                    child: MoviePosterCarousel(
-                      movies: movies,
-                      onPageChanged: (index) {
-                        _controller.currentIndex.value = index;
+                  Expanded(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () async {
+                        AppState.selectedMovie.value = activeMovie;
+                        await context.push('/details');
                       },
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 350,
+                            child: MoviePosterCarousel(
+                              movies: movies,
+                              onPageChanged: (index) {
+                                _controller.currentIndex.value = index;
+                              },
+                              onTap: (movie) async {
+                                AppState.selectedMovie.value = movie;
+                                await context.push('/details');
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Expanded(child: MovieDetails(movie: activeMovie)),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  MovieDetails(movie: activeMovie),
                 ],
               ),
             ),
